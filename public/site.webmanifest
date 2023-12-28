@@ -1,0 +1,19 @@
+{
+    "name": "Scorecard",
+    "short_name": "SC",
+    "icons": [
+        {
+            "src": "/android-chrome-192x192.png",
+            "sizes": "192x192",
+            "type": "image/png"
+        },
+        {
+            "src": "/android-chrome-512x512.png",
+            "sizes": "512x512",
+            "type": "image/png"
+        }
+    ],
+    "theme_color": "#cce3fd",
+    "background_color": "#004493",
+    "display": "standalone"
+}
