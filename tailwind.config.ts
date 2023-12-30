@@ -11,13 +11,13 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ["'DM Sans'", ...defaultTheme.fontFamily.sans],
-                serif: ["'DM Serif Display'", ...defaultTheme.fontFamily.serif],
+                sans: ["'IBM Plex Sans'", ...defaultTheme.fontFamily.sans],
+                serif: ["'IBM Plex Serif'", ...defaultTheme.fontFamily.serif],
                 display: [
-                    "'Darker Grotesque'",
+                    "'Darker Grotesque Variable'",
                     ...defaultTheme.fontFamily.serif,
                 ],
-                mono: ["'DM Mono'", ...defaultTheme.fontFamily.mono],
+                mono: ["'IBM Plex Mono'", ...defaultTheme.fontFamily.mono],
             },
         },
     },
