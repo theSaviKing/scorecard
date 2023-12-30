@@ -56,47 +56,51 @@ function EnterTeams({
         }));
     };
     return (
-        <Card>
-            <CardHeader>
-                <h2 className="font-serif font-bold text-xl text-center">
-                    Enter team info
-                </h2>
-            </CardHeader>
-            <Divider />
-            <CardBody className="grid grid-cols-2 gap-4">
-                <Input
-                    label="Home team"
-                    color="primary"
-                    variant="faded"
-                    isRequired
-                    value={state.homeTeam.name}
-                    onValueChange={setHTName}
-                />
-                <Input
-                    label="Away team"
-                    className="text-right"
-                    color="secondary"
-                    variant="faded"
-                    isRequired
-                    value={state.awayTeam.name}
-                    onValueChange={setATName}
-                />
-            </CardBody>
-            <Divider />
-            <CardFooter className="flex justify-end">
-                <Button
-                    onClick={() => {
-                        setStep(2);
-                    }}
-                    endContent={
-                        <i data-feather="user-plus" className="w-4"></i>
-                    }
-                    variant="faded"
-                >
-                    Enter players
-                </Button>
-            </CardFooter>
-        </Card>
+        <form>
+            <Card>
+                <CardHeader>
+                    <h2 className="font-serif font-bold text-xl text-center">
+                        Enter team info
+                    </h2>
+                </CardHeader>
+                <Divider />
+                <CardBody className="grid grid-cols-2 gap-4">
+                    <Input
+                        label="Home team"
+                        color="primary"
+                        variant="faded"
+                        isRequired
+                        value={state.homeTeam.name}
+                        onValueChange={setHTName}
+                    />
+                    <Input
+                        label="Away team"
+                        className="text-right"
+                        color="secondary"
+                        variant="faded"
+                        isRequired
+                        value={state.awayTeam.name}
+                        onValueChange={setATName}
+                    />
+                </CardBody>
+                <Divider />
+                <CardFooter className="flex justify-end">
+                    <Button
+                        onClick={() => setStep(2)}
+                        endContent={
+                            <i data-feather="user-plus" className="w-4"></i>
+                        }
+                        variant="faded"
+                        isDisabled={
+                            state.homeTeam.name == "" ||
+                            state.awayTeam.name == ""
+                        }
+                    >
+                        Enter players
+                    </Button>
+                </CardFooter>
+            </Card>
+        </form>
     );
 }
 
