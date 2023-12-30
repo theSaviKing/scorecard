@@ -6,6 +6,8 @@ import {
     CardHeader,
     Divider,
     Input,
+    ScrollShadow,
+    Spacer,
 } from "@nextui-org/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import feather from "feather-icons";
@@ -41,16 +43,10 @@ function EnterTeams({
     setter: Dispatch<SetStateAction<typeof state>>;
     stepper: Dispatch<SetStateAction<number | null>>;
 }) {
-    const setHTName = (name: string) => {
+    const setName = (name: string, team: "homeTeam" | "awayTeam") => {
         setter((state) => ({
             ...state,
-            homeTeam: { ...state.homeTeam, name: name },
-        }));
-    };
-    const setATName = (name: string) => {
-        setter((state) => ({
-            ...state,
-            awayTeam: { ...state.awayTeam, name: name },
+            [team]: { ...state[team], name: name },
         }));
     };
     return (
@@ -69,7 +65,7 @@ function EnterTeams({
                         variant="flat"
                         isRequired
                         value={state.homeTeam.name}
-                        onValueChange={setHTName}
+                        onValueChange={(val) => setName(val, "homeTeam")}
                         className="focus:ring-primary/50"
                     />
                     <Input
@@ -79,7 +75,7 @@ function EnterTeams({
                         variant="flat"
                         isRequired
                         value={state.awayTeam.name}
-                        onValueChange={setATName}
+                        onValueChange={(val) => setName(val, "awayTeam")}
                     />
                 </CardBody>
                 <Divider />
@@ -108,11 +104,24 @@ function EnterTeams({
 
 function EnterPlayers({
     state,
+    setter,
     setStep,
 }: {
     state: State;
+    setter: Dispatch<SetStateAction<State>>;
     setStep: React.Dispatch<React.SetStateAction<number | null>>;
 }) {
+    const setName = produce(
+        (
+            draft: State,
+            index: number,
+            team: "homeTeam" | "awayTeam",
+            name: string
+        ) => {
+            draft[team].players[index].name = name;
+        }
+    );
+
     return (
         <Card>
             <CardHeader>
@@ -122,9 +131,37 @@ function EnterPlayers({
             </CardHeader>
             <Divider />
             <CardBody className="grid grid-cols-2 px-8 gap-4">
-                <div className="flex flex-col justify-center items-center">
-                    <p className="uppercase font-bold">Home Team</p>
-                    <p className="text-2xl font-thin">{state.homeTeam.name}</p>
+                <div className="flex flex-col justify-center items-center gap-2">
+                    <div className="flex flex-col items-center rounded bg-content2 py-4 px-8 w-full">
+                        <p className="uppercase font-bold">Home Team</p>
+                        <p className="text-2xl font-thin">
+                            {state.homeTeam.name}
+                        </p>
+                    </div>
+                    <div className="grid grid-cols-2 gap-2 w-96">
+                        {state.homeTeam.players.map((_, index) => (
+                            <div
+                                key={index}
+                                className="flex justify-center items-center"
+                            >
+                                <Input
+                                    size="sm"
+                                    variant="bordered"
+                                    value={state.homeTeam.players[index].name}
+                                    onValueChange={(pname) =>
+                                        setter((st) =>
+                                            setName(
+                                                st,
+                                                index,
+                                                "homeTeam",
+                                                pname
+                                            )
+                                        )
+                                    }
+                                />
+                            </div>
+                        ))}
+                    </div>
                 </div>
             </CardBody>
             <Divider />
@@ -156,8 +193,112 @@ function EnterPlayers({
 
 function App() {
     const [state, setState] = useState<State>({
-        homeTeam: { name: "", players: [] },
-        awayTeam: { name: "", players: [] },
+        homeTeam: {
+            name: "",
+            players: [
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+            ],
+        },
+        awayTeam: {
+            name: "",
+            players: [
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+                {
+                    name: "",
+                    goalsCaught: 0,
+                    goalsThrown: 0,
+                    defensivePlays: 0,
+                },
+            ],
+        },
     });
     const [step, setStep] = useState<null | number>(0);
 
@@ -188,7 +329,13 @@ function App() {
             {step == 1 && (
                 <EnterTeams state={state} setter={setState} stepper={setStep} />
             )}
-            {step == 2 && <EnterPlayers state={state} setStep={setStep} />}
+            {step == 2 && (
+                <EnterPlayers
+                    state={state}
+                    setter={setState}
+                    setStep={setStep}
+                />
+            )}
         </main>
     );
 }
