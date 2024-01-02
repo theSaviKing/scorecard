@@ -5,9 +5,6 @@ import {
     CardFooter,
     CardHeader,
     Divider,
-    Input,
-    ScrollShadow,
-    Textarea,
     Tooltip,
 } from "@nextui-org/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
