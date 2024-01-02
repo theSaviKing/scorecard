@@ -4,7 +4,6 @@ import {
     CardBody,
     CardFooter,
     CardHeader,
-    Checkbox,
     Divider,
     Input,
     ScrollShadow,
@@ -15,6 +14,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import feather from "feather-icons";
 import { produce } from "immer";
 import { useSessionStorage } from "usehooks-ts";
+import { TeamInput, PlayerInput, AdjustmentsInput } from "./components";
 
 interface State {
     homeTeam: {
@@ -65,7 +65,7 @@ const defaultState: State = {
     },
 };
 
-function EnterTeams({
+function EnterTeamInfo({
     state,
     setter,
     stepper,
@@ -75,12 +75,15 @@ function EnterTeams({
     stepper: Dispatch<SetStateAction<number | null>>;
 }) {
     const setName = (name: string, team: "homeTeam" | "awayTeam") => {
-        setter((state) => ({
-            ...state,
-            [team]: { ...state[team], name: name },
+        setter((prevState) => ({
+            ...prevState,
+            [team]: { ...prevState[team], name: name },
         }));
     };
-    const isDisabled = state.homeTeam.name == "" || state.awayTeam.name == "";
+
+    const { homeTeam, awayTeam } = state;
+    const isDisabled = homeTeam.name === "" || awayTeam.name === "";
+
     return (
         <form>
             <Card>
@@ -91,23 +94,21 @@ function EnterTeams({
                 </CardHeader>
                 <Divider />
                 <CardBody className="grid grid-cols-2 gap-4">
-                    <Input
+                    <TeamInput
                         label="Home team"
                         color="primary"
                         variant="flat"
-                        isRequired
-                        value={state.homeTeam.name}
+                        value={homeTeam.name}
                         onValueChange={(val) => setName(val, "homeTeam")}
                         className="focus:ring-primary/50"
                     />
-                    <Input
+                    <TeamInput
                         label="Away team"
-                        className="text-right focus:ring-secondary/50"
                         color="secondary"
                         variant="flat"
-                        isRequired
-                        value={state.awayTeam.name}
+                        value={awayTeam.name}
                         onValueChange={(val) => setName(val, "awayTeam")}
+                        className="focus:ring-secondary/50"
                     />
                 </CardBody>
                 <Divider />
@@ -121,9 +122,7 @@ function EnterTeams({
                     >
                         <div>
                             <Button
-                                onClick={() => {
-                                    stepper(2);
-                                }}
+                                onClick={() => stepper(2)}
                                 endContent={
                                     <i
                                         data-feather="user-plus"
@@ -144,26 +143,15 @@ function EnterTeams({
     );
 }
 
-function EnterPlayers({
+function EnterPlayerInfo({
     state,
     setter,
-    setStep,
+    stepper,
 }: {
     state: State;
     setter: Dispatch<SetStateAction<State>>;
-    setStep: React.Dispatch<React.SetStateAction<number | null>>;
+    stepper: React.Dispatch<React.SetStateAction<number | null>>;
 }) {
-    const setName = produce(
-        (
-            draft: State,
-            index: number,
-            team: "homeTeam" | "awayTeam",
-            name: string
-        ) => {
-            draft[team].players[index].name = name;
-        }
-    );
-
     const isDisabled =
         state.homeTeam.players.filter((player) => player.name.length <= 0)
             .length >= 8 ||
@@ -178,146 +166,8 @@ function EnterPlayers({
             </CardHeader>
             <Divider />
             <CardBody className="grid grid-cols-2 px-8 gap-4">
-                <div className="flex flex-col justify-center items-center gap-2">
-                    <div className="flex flex-col items-center rounded bg-primary-200 text-primary-900 py-4 px-8 w-full">
-                        <p className="uppercase font-bold">Home Team</p>
-                        <p className="text-2xl font-thin">
-                            {state.homeTeam.name}
-                        </p>
-                    </div>
-                    <ScrollShadow className="grid grid-cols-2 gap-2 justify-items-stretch items-stretch w-96 h-60 overflow-auto">
-                        {state.homeTeam.players.map((_, index) => (
-                            <div
-                                key={index}
-                                className={
-                                    "flex justify-center items-center group" +
-                                    (index == 0 ? " col-span-full" : "")
-                                }
-                            >
-                                <Input
-                                    size="sm"
-                                    variant={index == 0 ? "faded" : "bordered"}
-                                    color={index == 0 ? "primary" : "default"}
-                                    value={state.homeTeam.players[index].name}
-                                    placeholder={
-                                        index == 0
-                                            ? "Team Captain"
-                                            : `Player #${index + 1}`
-                                    }
-                                    startContent={
-                                        index == 0 ? (
-                                            <i
-                                                data-feather="award"
-                                                className="w-4 opacity-80"
-                                            ></i>
-                                        ) : (
-                                            <></>
-                                        )
-                                    }
-                                    onValueChange={(pname) => {
-                                        setter((st) =>
-                                            setName(
-                                                st,
-                                                index,
-                                                "homeTeam",
-                                                pname
-                                            )
-                                        );
-                                    }}
-                                />
-                            </div>
-                        ))}
-                        <Button
-                            onClick={() =>
-                                setter((st) =>
-                                    produce(st, (draft) => {
-                                        draft.homeTeam.players.push({
-                                            id: crypto.randomUUID(),
-                                            name: "",
-                                            goalsCaught: 0,
-                                            goalsThrown: 0,
-                                            defensivePlays: 0,
-                                        });
-                                    })
-                                )
-                            }
-                            size="lg"
-                            radius="sm"
-                        >
-                            +
-                        </Button>
-                    </ScrollShadow>
-                </div>
-                <div className="flex flex-col justify-center items-center gap-2">
-                    <div className="flex flex-col items-center rounded bg-secondary-200 text-secondary-900 py-4 px-8 w-full">
-                        <p className="uppercase font-bold">Away Team</p>
-                        <p className="text-2xl font-thin">
-                            {state.awayTeam.name}
-                        </p>
-                    </div>
-                    <ScrollShadow className="grid grid-cols-2 gap-2 justify-items-stretch items-stretch w-96 h-60 overflow-auto">
-                        {state.awayTeam.players.map((player, index) => (
-                            <div
-                                key={player.id}
-                                className={
-                                    "flex justify-center items-center group" +
-                                    (index == 0 ? " col-span-full" : "")
-                                }
-                            >
-                                <Input
-                                    size="sm"
-                                    variant={index == 0 ? "faded" : "bordered"}
-                                    color={index == 0 ? "secondary" : "default"}
-                                    value={state.awayTeam.players[index].name}
-                                    placeholder={
-                                        index == 0
-                                            ? "Team Captain"
-                                            : `Player #${index + 1}`
-                                    }
-                                    startContent={
-                                        index == 0 ? (
-                                            <i
-                                                data-feather="award"
-                                                className="w-4 opacity-80"
-                                            ></i>
-                                        ) : (
-                                            <></>
-                                        )
-                                    }
-                                    onValueChange={(pname) =>
-                                        setter((st) =>
-                                            setName(
-                                                st,
-                                                index,
-                                                "awayTeam",
-                                                pname
-                                            )
-                                        )
-                                    }
-                                />
-                            </div>
-                        ))}
-                        <Button
-                            onClick={() =>
-                                setter((st) =>
-                                    produce(st, (draft) => {
-                                        draft.awayTeam.players.push({
-                                            id: crypto.randomUUID(),
-                                            name: "",
-                                            goalsCaught: 0,
-                                            goalsThrown: 0,
-                                            defensivePlays: 0,
-                                        });
-                                    })
-                                )
-                            }
-                            size="lg"
-                            radius="sm"
-                        >
-                            +
-                        </Button>
-                    </ScrollShadow>
-                </div>
+                <PlayerInput state={state} homeOrAway={true} setter={setter} />
+                <PlayerInput state={state} homeOrAway={false} setter={setter} />
             </CardBody>
             <Divider />
             <CardFooter className="flex justify-between gap-4">
@@ -327,7 +177,7 @@ function EnterPlayers({
                         <i data-feather="arrow-left-circle" className="w-4"></i>
                     }
                     onClick={() =>
-                        setStep((step) =>
+                        stepper((step) =>
                             typeof step == "number" ? step - 1 : step
                         )
                     }
@@ -361,7 +211,7 @@ function EnterPlayers({
                                             );
                                     })
                                 );
-                                setStep(3);
+                                stepper(3);
                             }}
                         >
                             Enter adjustments
@@ -373,7 +223,7 @@ function EnterPlayers({
     );
 }
 
-function EnterAdjustments({
+function EnterPointAdjustments({
     state,
     setter,
     stepper,
@@ -398,246 +248,16 @@ function EnterAdjustments({
             </CardHeader>
             <Divider />
             <CardBody className="grid grid-cols-2 justify-center items-start px-8 gap-4">
-                <div className="flex flex-col gap-2 justify-center items-center">
-                    <div className="flex flex-col items-center rounded bg-primary-200 text-primary-900 py-4 px-8 w-full">
-                        <p className="uppercase font-bold">Home Team</p>
-                        <p className="text-2xl font-thin">
-                            {state.homeTeam.name}
-                        </p>
-                    </div>
-                    <Divider />
-                    {state.homeTeam.adjustments.length === 0 ? (
-                        <div className="w-full py-4 px-8 text-center border-2 border-content2 rounded">
-                            No adjustments
-                        </div>
-                    ) : (
-                        state.homeTeam.adjustments.map((adj, index) => (
-                            <div
-                                className={`flex justify-center items-center gap-4 px-8 py-4 text-primary-900 bg-primary-100`}
-                            >
-                                <p className="text-4xl font-bold font-mono flex justify-center items-center gap-1">
-                                    +
-                                    <Input
-                                        color="primary"
-                                        classNames={{
-                                            inputWrapper:
-                                                "border-primary-200 group-hover:border-primary-500 px-2 py-0.5",
-                                            input: "text-4xl w-[1ch] text-center font-bold",
-                                        }}
-                                        maxLength={1}
-                                        variant="bordered"
-                                        radius="none"
-                                        value={((value) =>
-                                            value == null ? "" : String(value))(
-                                            state.homeTeam.adjustments[index]
-                                                .value
-                                        )}
-                                        onInput={(ev) =>
-                                            setter((st) =>
-                                                produce(st, (draft) => {
-                                                    draft.homeTeam.adjustments[
-                                                        index
-                                                    ].value = parseInt(
-                                                        ev.currentTarget.value
-                                                    );
-                                                })
-                                            )
-                                        }
-                                    />
-                                </p>
-                                <Divider
-                                    orientation="vertical"
-                                    className="bg-primary"
-                                />
-                                <Textarea
-                                    label="Reason"
-                                    placeholder="Less than two women on opposing team"
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    color="primary"
-                                    classNames={{
-                                        inputWrapper:
-                                            "border-primary-200 group-hover:border-primary-500",
-                                        input: "placeholder:text-primary-900/80",
-                                    }}
-                                    variant="bordered"
-                                    value={
-                                        state.homeTeam.adjustments[index].reason
-                                    }
-                                    onValueChange={(value) =>
-                                        setter((st) =>
-                                            produce(st, (draft) => {
-                                                draft.homeTeam.adjustments[
-                                                    index
-                                                ].reason = value;
-                                            })
-                                        )
-                                    }
-                                    maxRows={2}
-                                />
-                                <Button
-                                    isIconOnly
-                                    className="bg-danger-200 text-danger-700 rounded-sm"
-                                    onClick={() =>
-                                        setter((st) =>
-                                            produce(st, (draft) => {
-                                                draft.homeTeam.adjustments.splice(
-                                                    index,
-                                                    1
-                                                );
-                                            })
-                                        )
-                                    }
-                                >
-                                    <i data-feather="trash"></i>
-                                </Button>
-                            </div>
-                        ))
-                    )}
-                    {state.homeTeam.adjustments.length < 3 && (
-                        <Button
-                            isIconOnly
-                            radius="full"
-                            color="primary"
-                            variant="flat"
-                            onClick={() =>
-                                setter((st) =>
-                                    produce(st, (draft) => {
-                                        draft.homeTeam.adjustments.push({
-                                            value: 0,
-                                            reason: "",
-                                        });
-                                    })
-                                )
-                            }
-                        >
-                            <i
-                                data-feather="plus-circle"
-                                className="stroke-1"
-                            ></i>
-                        </Button>
-                    )}
-                </div>
-                <div className="flex flex-col gap-2 justify-center items-center">
-                    <div className="flex flex-col items-center rounded bg-secondary-200 text-secondary-900 py-4 px-8 w-full">
-                        <p className="uppercase font-bold">away Team</p>
-                        <p className="text-2xl font-thin">
-                            {state.awayTeam.name}
-                        </p>
-                    </div>
-                    <Divider />
-                    {state.awayTeam.adjustments.length === 0 ? (
-                        <div className="w-full py-4 px-8 text-center border-2 border-content2 rounded">
-                            No adjustments
-                        </div>
-                    ) : (
-                        state.awayTeam.adjustments.map((adj, index) => (
-                            <div
-                                className={`flex justify-center items-center gap-4 px-8 py-4 text-secondary-900 bg-secondary-100`}
-                            >
-                                <p className="text-4xl font-bold font-mono flex justify-center items-center gap-1">
-                                    +
-                                    <Input
-                                        color="secondary"
-                                        classNames={{
-                                            inputWrapper:
-                                                "border-secondary-200 group-hover:border-secondary-500 px-2 py-0.5",
-                                            input: "text-4xl w-[1ch] text-center font-bold",
-                                        }}
-                                        maxLength={1}
-                                        variant="bordered"
-                                        radius="none"
-                                        value={((value) =>
-                                            value == null ? "" : String(value))(
-                                            state.awayTeam.adjustments[index]
-                                                .value
-                                        )}
-                                        onInput={(ev) =>
-                                            setter((st) =>
-                                                produce(st, (draft) => {
-                                                    draft.awayTeam.adjustments[
-                                                        index
-                                                    ].value = parseInt(
-                                                        ev.currentTarget.value
-                                                    );
-                                                })
-                                            )
-                                        }
-                                    />
-                                </p>
-                                <Divider
-                                    orientation="vertical"
-                                    className="bg-secondary"
-                                />
-                                <Textarea
-                                    label="Reason"
-                                    placeholder="Less than two women on opposing team"
-                                    size="sm"
-                                    labelPlacement="outside"
-                                    color="secondary"
-                                    classNames={{
-                                        inputWrapper:
-                                            "border-secondary-200 group-hover:border-secondary-500",
-                                        input: "placeholder:text-secondary-900/80",
-                                    }}
-                                    variant="bordered"
-                                    value={
-                                        state.awayTeam.adjustments[index].reason
-                                    }
-                                    onValueChange={(value) =>
-                                        setter((st) =>
-                                            produce(st, (draft) => {
-                                                draft.awayTeam.adjustments[
-                                                    index
-                                                ].reason = value;
-                                            })
-                                        )
-                                    }
-                                    maxRows={2}
-                                />
-                                <Button
-                                    isIconOnly
-                                    className="bg-danger-200 text-danger-700 rounded-sm"
-                                    onClick={() =>
-                                        setter((st) =>
-                                            produce(st, (draft) => {
-                                                draft.awayTeam.adjustments.splice(
-                                                    index,
-                                                    1
-                                                );
-                                            })
-                                        )
-                                    }
-                                >
-                                    <i data-feather="trash"></i>
-                                </Button>
-                            </div>
-                        ))
-                    )}
-                    {state.awayTeam.adjustments.length < 3 && (
-                        <Button
-                            isIconOnly
-                            radius="full"
-                            color="primary"
-                            variant="flat"
-                            onClick={() =>
-                                setter((st) =>
-                                    produce(st, (draft) => {
-                                        draft.awayTeam.adjustments.push({
-                                            value: 0,
-                                            reason: "",
-                                        });
-                                    })
-                                )
-                            }
-                        >
-                            <i
-                                data-feather="plus-circle"
-                                className="stroke-1"
-                            ></i>
-                        </Button>
-                    )}
-                </div>
+                <AdjustmentsInput
+                    homeOrAway={true}
+                    setter={setter}
+                    state={state}
+                />
+                <AdjustmentsInput
+                    homeOrAway={false}
+                    setter={setter}
+                    state={state}
+                />
             </CardBody>
             <Divider />
             <CardFooter className="flex justify-between">
@@ -664,12 +284,29 @@ function EnterAdjustments({
                             variant="flat"
                             color="success"
                             isDisabled={!isValid}
+                            onClick={() => stepper(null)}
                         >
                             Start keeping score
                         </Button>
                     </div>
                 </Tooltip>
             </CardFooter>
+        </Card>
+    );
+}
+
+function ScoreKeeper() {
+    return (
+        <Card>
+            <CardHeader className="text-center">
+                <h2 className="font-serif font-bold text-xl text-center">
+                    ScoreKeeper
+                </h2>
+            </CardHeader>
+            <Divider />
+            <CardBody className="flex flex-col justify-center items-center"></CardBody>
+            <Divider />
+            <CardFooter></CardFooter>
         </Card>
     );
 }
@@ -685,11 +322,11 @@ function App() {
     return (
         <main className="w-full h-full flex flex-col justify-center items-center gap-4">
             {step != null && (
-                <header className="flex font-serif">
+                <header className="space-y-2 text-center font-serif">
                     <h1 className="text-5xl font-light">ScoreCard</h1>
+                    <p>Track, display, update.</p>
                 </header>
             )}
-            <p>Track, display, update.</p>
             {step == 0 && (
                 <Button
                     endContent={<i data-feather="activity" className="w-4"></i>}
@@ -703,22 +340,27 @@ function App() {
                 </Button>
             )}
             {step == 1 && (
-                <EnterTeams state={state} setter={setState} stepper={setStep} />
-            )}
-            {step == 2 && (
-                <EnterPlayers
-                    state={state}
-                    setter={setState}
-                    setStep={setStep}
-                />
-            )}
-            {step == 3 && (
-                <EnterAdjustments
+                <EnterTeamInfo
                     state={state}
                     setter={setState}
                     stepper={setStep}
                 />
             )}
+            {step == 2 && (
+                <EnterPlayerInfo
+                    state={state}
+                    setter={setState}
+                    stepper={setStep}
+                />
+            )}
+            {step == 3 && (
+                <EnterPointAdjustments
+                    state={state}
+                    setter={setState}
+                    stepper={setStep}
+                />
+            )}
+            {step == null && <ScoreKeeper />}
         </main>
     );
 }
