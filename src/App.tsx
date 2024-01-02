@@ -8,6 +8,7 @@ import {
     Divider,
     Input,
     ScrollShadow,
+    Textarea,
     Tooltip,
 } from "@nextui-org/react";
 import { Dispatch, SetStateAction, useEffect, useState } from "react";
@@ -36,7 +37,7 @@ interface State {
             goalsThrown: number;
             defensivePlays: number;
         }[];
-        adjustments: { positive: boolean; value: number; reason: string }[];
+        adjustments: { value: number; reason: string }[];
     };
 }
 const defaultState: State = {
@@ -381,6 +382,13 @@ function EnterAdjustments({
     setter: Dispatch<SetStateAction<State>>;
     stepper: Dispatch<SetStateAction<number | null>>;
 }) {
+    const isValid: boolean =
+        state.homeTeam.adjustments.every(
+            (adj) => adj.value > 0 && adj.reason.length > 0
+        ) &&
+        state.awayTeam.adjustments.every(
+            (adj) => adj.value > 0 && adj.reason.length > 0
+        );
     return (
         <Card>
             <CardHeader>
@@ -389,7 +397,7 @@ function EnterAdjustments({
                 </h2>
             </CardHeader>
             <Divider />
-            <CardBody className="grid grid-cols-2 px-8 gap-4">
+            <CardBody className="grid grid-cols-2 justify-center items-start px-8 gap-4">
                 <div className="flex flex-col gap-2 justify-center items-center">
                     <div className="flex flex-col items-center rounded bg-primary-200 text-primary-900 py-4 px-8 w-full">
                         <p className="uppercase font-bold">Home Team</p>
@@ -405,13 +413,7 @@ function EnterAdjustments({
                     ) : (
                         state.homeTeam.adjustments.map((adj, index) => (
                             <div
-                                className={`flex justify-center items-center gap-4 px-8 py-4 text-primary-900 ${
-                                    index == 0
-                                        ? "bg-primary-100"
-                                        : index == 1
-                                        ? "bg-primary-200"
-                                        : "bg-primary-300"
-                                }`}
+                                className={`flex justify-center items-center gap-4 px-8 py-4 text-primary-900 bg-primary-100`}
                             >
                                 <p className="text-4xl font-bold font-mono flex justify-center items-center gap-1">
                                     +
@@ -424,7 +426,7 @@ function EnterAdjustments({
                                         }}
                                         maxLength={1}
                                         variant="bordered"
-                                        radius="sm"
+                                        radius="none"
                                         value={((value) =>
                                             value == null ? "" : String(value))(
                                             state.homeTeam.adjustments[index]
@@ -447,7 +449,7 @@ function EnterAdjustments({
                                     orientation="vertical"
                                     className="bg-primary"
                                 />
-                                <Input
+                                <Textarea
                                     label="Reason"
                                     placeholder="Less than two women on opposing team"
                                     size="sm"
@@ -471,29 +473,170 @@ function EnterAdjustments({
                                             })
                                         )
                                     }
+                                    maxRows={2}
                                 />
+                                <Button
+                                    isIconOnly
+                                    className="bg-danger-200 text-danger-700 rounded-sm"
+                                    onClick={() =>
+                                        setter((st) =>
+                                            produce(st, (draft) => {
+                                                draft.homeTeam.adjustments.splice(
+                                                    index,
+                                                    1
+                                                );
+                                            })
+                                        )
+                                    }
+                                >
+                                    <i data-feather="trash"></i>
+                                </Button>
                             </div>
                         ))
                     )}
-                    <Button
-                        isIconOnly
-                        radius="full"
-                        color="primary"
-                        variant="flat"
-                        isDisabled={state.homeTeam.adjustments.length >= 3}
-                        onClick={() =>
-                            setter((st) =>
-                                produce(st, (draft) => {
-                                    draft.homeTeam.adjustments.push({
-                                        value: 0,
-                                        reason: "",
-                                    });
-                                })
-                            )
-                        }
-                    >
-                        <i data-feather="plus-circle" className="stroke-1"></i>
-                    </Button>
+                    {state.homeTeam.adjustments.length < 3 && (
+                        <Button
+                            isIconOnly
+                            radius="full"
+                            color="primary"
+                            variant="flat"
+                            onClick={() =>
+                                setter((st) =>
+                                    produce(st, (draft) => {
+                                        draft.homeTeam.adjustments.push({
+                                            value: 0,
+                                            reason: "",
+                                        });
+                                    })
+                                )
+                            }
+                        >
+                            <i
+                                data-feather="plus-circle"
+                                className="stroke-1"
+                            ></i>
+                        </Button>
+                    )}
+                </div>
+                <div className="flex flex-col gap-2 justify-center items-center">
+                    <div className="flex flex-col items-center rounded bg-secondary-200 text-secondary-900 py-4 px-8 w-full">
+                        <p className="uppercase font-bold">away Team</p>
+                        <p className="text-2xl font-thin">
+                            {state.awayTeam.name}
+                        </p>
+                    </div>
+                    <Divider />
+                    {state.awayTeam.adjustments.length === 0 ? (
+                        <div className="w-full py-4 px-8 text-center border-2 border-content2 rounded">
+                            No adjustments
+                        </div>
+                    ) : (
+                        state.awayTeam.adjustments.map((adj, index) => (
+                            <div
+                                className={`flex justify-center items-center gap-4 px-8 py-4 text-secondary-900 bg-secondary-100`}
+                            >
+                                <p className="text-4xl font-bold font-mono flex justify-center items-center gap-1">
+                                    +
+                                    <Input
+                                        color="secondary"
+                                        classNames={{
+                                            inputWrapper:
+                                                "border-secondary-200 group-hover:border-secondary-500 px-2 py-0.5",
+                                            input: "text-4xl w-[1ch] text-center font-bold",
+                                        }}
+                                        maxLength={1}
+                                        variant="bordered"
+                                        radius="none"
+                                        value={((value) =>
+                                            value == null ? "" : String(value))(
+                                            state.awayTeam.adjustments[index]
+                                                .value
+                                        )}
+                                        onInput={(ev) =>
+                                            setter((st) =>
+                                                produce(st, (draft) => {
+                                                    draft.awayTeam.adjustments[
+                                                        index
+                                                    ].value = parseInt(
+                                                        ev.currentTarget.value
+                                                    );
+                                                })
+                                            )
+                                        }
+                                    />
+                                </p>
+                                <Divider
+                                    orientation="vertical"
+                                    className="bg-secondary"
+                                />
+                                <Textarea
+                                    label="Reason"
+                                    placeholder="Less than two women on opposing team"
+                                    size="sm"
+                                    labelPlacement="outside"
+                                    color="secondary"
+                                    classNames={{
+                                        inputWrapper:
+                                            "border-secondary-200 group-hover:border-secondary-500",
+                                        input: "placeholder:text-secondary-900/80",
+                                    }}
+                                    variant="bordered"
+                                    value={
+                                        state.awayTeam.adjustments[index].reason
+                                    }
+                                    onValueChange={(value) =>
+                                        setter((st) =>
+                                            produce(st, (draft) => {
+                                                draft.awayTeam.adjustments[
+                                                    index
+                                                ].reason = value;
+                                            })
+                                        )
+                                    }
+                                    maxRows={2}
+                                />
+                                <Button
+                                    isIconOnly
+                                    className="bg-danger-200 text-danger-700 rounded-sm"
+                                    onClick={() =>
+                                        setter((st) =>
+                                            produce(st, (draft) => {
+                                                draft.awayTeam.adjustments.splice(
+                                                    index,
+                                                    1
+                                                );
+                                            })
+                                        )
+                                    }
+                                >
+                                    <i data-feather="trash"></i>
+                                </Button>
+                            </div>
+                        ))
+                    )}
+                    {state.awayTeam.adjustments.length < 3 && (
+                        <Button
+                            isIconOnly
+                            radius="full"
+                            color="primary"
+                            variant="flat"
+                            onClick={() =>
+                                setter((st) =>
+                                    produce(st, (draft) => {
+                                        draft.awayTeam.adjustments.push({
+                                            value: 0,
+                                            reason: "",
+                                        });
+                                    })
+                                )
+                            }
+                        >
+                            <i
+                                data-feather="plus-circle"
+                                className="stroke-1"
+                            ></i>
+                        </Button>
+                    )}
                 </div>
             </CardBody>
             <Divider />
@@ -507,13 +650,25 @@ function EnterAdjustments({
                 >
                     Back to player info
                 </Button>
-                <Button
-                    endContent={<i data-feather="activity" className="w-4"></i>}
-                    variant="flat"
-                    color="success"
+                <Tooltip
+                    color="danger"
+                    placement="bottom-end"
+                    content="All adjustments must have values."
+                    isDisabled={isValid}
                 >
-                    Start keeping score
-                </Button>
+                    <div>
+                        <Button
+                            endContent={
+                                <i data-feather="activity" className="w-4"></i>
+                            }
+                            variant="flat"
+                            color="success"
+                            isDisabled={!isValid}
+                        >
+                            Start keeping score
+                        </Button>
+                    </div>
+                </Tooltip>
             </CardFooter>
         </Card>
     );
