@@ -11,7 +11,13 @@ import { Dispatch, SetStateAction, useEffect, useState } from "react";
 import feather from "feather-icons";
 import { produce } from "immer";
 import { useSessionStorage } from "usehooks-ts";
-import { TeamInput, PlayerInput, AdjustmentsInput } from "./components";
+import {
+    TeamInput,
+    PlayerInput,
+    AdjustmentsInput,
+    ScoreKeeper,
+} from "./components";
+import { BroadcastChannel } from "broadcast-channel";
 
 interface State {
     homeTeam: {
@@ -292,23 +298,9 @@ function EnterPointAdjustments({
     );
 }
 
-function ScoreKeeper() {
-    return (
-        <Card>
-            <CardHeader className="text-center">
-                <h2 className="font-serif font-bold text-xl text-center">
-                    ScoreKeeper
-                </h2>
-            </CardHeader>
-            <Divider />
-            <CardBody className="flex flex-col justify-center items-center"></CardBody>
-            <Divider />
-            <CardFooter></CardFooter>
-        </Card>
-    );
-}
-
 function App() {
+    const bc = new BroadcastChannel("scoreboard");
+
     const [state, setState] = useSessionStorage<State>("state", defaultState);
     const [step, setStep] = useState<null | number>(0);
 
@@ -357,7 +349,7 @@ function App() {
                     stepper={setStep}
                 />
             )}
-            {step == null && <ScoreKeeper />}
+            {step == null && <ScoreKeeper bc={bc} state={state} />}
         </main>
     );
 }

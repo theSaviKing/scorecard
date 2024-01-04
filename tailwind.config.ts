@@ -1,6 +1,7 @@
 import type { Config } from "tailwindcss";
 import { nextui } from "@nextui-org/react";
 import defaultTheme from "tailwindcss/defaultTheme";
+import tailwindOpenType from "tailwindcss-opentype";
 
 export default {
     content: [
@@ -56,6 +57,7 @@ export default {
                 },
             },
         }),
+        require("tailwindcss-opentype"),
     ],
     darkMode: "class",
 } satisfies Config;
