@@ -2,6 +2,7 @@ import { State } from "@/types";
 import { Divider, Input, Textarea, Button } from "@nextui-org/react";
 import { produce } from "immer";
 import { Dispatch, SetStateAction } from "react";
+import { PlusCircle, Trash } from "react-feather";
 
 export function AdjustmentsInput({
     state,
@@ -122,7 +123,7 @@ export function AdjustmentsInput({
                                 )
                             }
                         >
-                            <i data-feather="trash"></i>
+                            <Trash />
                         </Button>
                     </div>
                 ))
@@ -146,7 +147,7 @@ export function AdjustmentsInput({
                         )
                     }
                 >
-                    <i data-feather="plus-circle" className="stroke-1"></i>
+                    <PlusCircle className="stroke-1" />
                 </Button>
             )}
         </div>

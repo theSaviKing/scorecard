@@ -2,6 +2,7 @@ import { ScrollShadow, Input, Button } from "@nextui-org/react";
 import { produce } from "immer";
 import { State } from "@/types";
 import { Dispatch, SetStateAction } from "react";
+import { Award } from "react-feather";
 
 export function PlayerInput({
     state,
@@ -64,10 +65,7 @@ export function PlayerInput({
                             }
                             startContent={
                                 index == 0 ? (
-                                    <i
-                                        data-feather="award"
-                                        className="w-4 opacity-80"
-                                    ></i>
+                                    <Award className="w-4 opacity-80" />
                                 ) : (
                                     <></>
                                 )
