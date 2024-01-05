@@ -22,6 +22,7 @@ import {
     SelectItem,
 } from "@nextui-org/react";
 import { BroadcastChannel } from "broadcast-channel";
+import { produce } from "immer";
 import { Dispatch, SetStateAction, useState } from "react";
 import { Edit, Loader, Minus, Plus, X } from "react-feather";
 
@@ -140,7 +141,11 @@ function AddScore({
             <div className="grid grid-cols-2 gap-2">
                 <Button
                     radius="sm"
-                    onPress={() => setTeam("home")}
+                    onPress={() => {
+                        setTeam("home");
+                        setThrower("");
+                        setCatcher("");
+                    }}
                     className={
                         team == "home"
                             ? "border bg-primary-200 border-primary-200 text-primary-900 font-bold"
@@ -151,7 +156,11 @@ function AddScore({
                 </Button>
                 <Button
                     radius="sm"
-                    onPress={() => setTeam("away")}
+                    onPress={() => {
+                        setTeam("away");
+                        setThrower("");
+                        setCatcher("");
+                    }}
                     className={
                         team == "away"
                             ? "border bg-secondary-200 border-secondary-200 text-secondary-900 font-bold"
@@ -211,7 +220,19 @@ function AddScore({
                     a point!
                 </p>
             )}
-            <Button className="col-span-full" color="success" variant="flat">
+            <Button
+                className="col-span-full"
+                color="success"
+                variant="flat"
+                isDisabled={!(team && thrower && catcher)}
+                onPress={(e) => {
+                    setter((st) =>
+                        produce(st, (draft) => {
+                            draft[`${team!}Team`];
+                        })
+                    );
+                }}
+            >
                 Submit
             </Button>
         </div>
