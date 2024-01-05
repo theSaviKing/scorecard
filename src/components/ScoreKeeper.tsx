@@ -199,6 +199,21 @@ function AddScore({
             ) : (
                 <NoTeamChosen />
             )}
+            {thrower && catcher && (
+                <p
+                    className={`col-span-full p-4 rounded-sm border-2 border-content2 text-center [&>span]:font-bold ${
+                        team == "home"
+                            ? "[&>span]:text-primary"
+                            : "[&>span]:text-secondary"
+                    }`}
+                >
+                    <span>{thrower}</span> throws to <span>{catcher}</span> for
+                    a point!
+                </p>
+            )}
+            <Button className="col-span-full" color="success" variant="flat">
+                Submit
+            </Button>
         </div>
     );
 }
@@ -288,6 +303,7 @@ function ActionButtons({
                         color={act.color}
                         startContent={act.icon}
                         onPress={() => handleOpen(act.key)}
+                        key={act.key}
                     >
                         {act.label}
                     </Button>

@@ -42,6 +42,12 @@ function App() {
 
     const [state, setState] = useSessionStorage<State>("state", defaultState);
     const [step, setStep] = useState<null | number>(0);
+    const [inputDone, setInputDone] = useSessionStorage("inputDone", false);
+
+    if (inputDone && step !== null) {
+        setStep(null);
+    }
+    console.log(inputDone, step);
 
     useEffect(() => {
         feather.replace();
