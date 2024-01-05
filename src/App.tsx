@@ -58,7 +58,7 @@ function App() {
             {step == 0 && (
                 <Button
                     endContent={<Activity className="w-4" />}
-                    onClick={() => setStep(1)}
+                    onPress={() => setStep(1)}
                     color="primary"
                     variant="flat"
                     size="lg"
@@ -88,7 +88,9 @@ function App() {
                     stepper={setStep}
                 />
             )}
-            {step == null && <ScoreKeeper bc={bc} state={state} />}
+            {step == null && (
+                <ScoreKeeper bc={bc} state={state} setter={setState} />
+            )}
         </main>
     );
 }

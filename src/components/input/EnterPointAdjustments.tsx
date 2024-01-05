@@ -52,7 +52,7 @@ export function EnterPointAdjustments({
             <CardFooter className="flex justify-between">
                 <Button
                     endContent={<UserPlus className="w-4" />}
-                    onClick={() => stepper(2)}
+                    onPress={() => stepper(2)}
                     variant="flat"
                 >
                     Back to player info
@@ -69,7 +69,7 @@ export function EnterPointAdjustments({
                             variant="flat"
                             color="success"
                             isDisabled={!isValid}
-                            onClick={() => stepper(null)}
+                            onPress={() => stepper(null)}
                         >
                             Start keeping score
                         </Button>

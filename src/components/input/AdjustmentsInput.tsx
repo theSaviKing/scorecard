@@ -113,7 +113,7 @@ export function AdjustmentsInput({
                         <Button
                             isIconOnly
                             className="bg-danger-200 text-danger-700 rounded-sm"
-                            onClick={() =>
+                            onPress={() =>
                                 setter((st) =>
                                     produce(st, (draft) => {
                                         draft[
@@ -134,7 +134,7 @@ export function AdjustmentsInput({
                     radius="full"
                     color={homeOrAway ? "primary" : "secondary"}
                     variant="flat"
-                    onClick={() =>
+                    onPress={() =>
                         setter((st) =>
                             produce(st, (draft) => {
                                 draft[

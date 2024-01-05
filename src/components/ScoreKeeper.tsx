@@ -15,7 +15,7 @@ import {
     ModalBody,
 } from "@nextui-org/react";
 import { BroadcastChannel } from "broadcast-channel";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { Edit, Loader, Minus, Plus } from "react-feather";
 
 function TeamScore({
@@ -110,19 +110,53 @@ function TeamPlayers({
     );
 }
 
-function AddScore() {
+function AddScore({
+    state,
+    setter,
+}: {
+    state: State;
+    setter: Dispatch<SetStateAction<State>>;
+}) {
+    return (
+        <div className="flex flex-col justify-center items-center gap-2">
+            <p className="text-xl">Choose team:</p>
+        </div>
+    );
+}
+function DeleteScore({
+    state,
+    setter,
+}: {
+    state: State;
+    setter: Dispatch<SetStateAction<State>>;
+}) {
     return <div></div>;
 }
-function DeleteScore() {
+function ModifyPlay({
+    state,
+    setter,
+}: {
+    state: State;
+    setter: Dispatch<SetStateAction<State>>;
+}) {
     return <div></div>;
 }
-function ModifyPlay() {
+function AddPlay({
+    state,
+    setter,
+}: {
+    state: State;
+    setter: Dispatch<SetStateAction<State>>;
+}) {
     return <div></div>;
 }
-function AddPlay() {
-    return <div></div>;
-}
-function ActionButtons({ state }: { state: State }) {
+function ActionButtons({
+    state,
+    setter,
+}: {
+    state: State;
+    setter: Dispatch<SetStateAction<State>>;
+}) {
     const { isOpen, onOpen, onClose } = useDisclosure();
 
     const actions = [
@@ -163,6 +197,8 @@ function ActionButtons({ state }: { state: State }) {
         onOpen();
     };
 
+    const ActionComponent = actions.find((a) => a.key === action)!.component;
+
     return (
         <>
             <div className="col-span-full grid grid-cols-4 gap-4">
@@ -188,7 +224,12 @@ function ActionButtons({ state }: { state: State }) {
                                         .label
                                 }
                             </ModalHeader>
-                            <ModalBody></ModalBody>
+                            <ModalBody>
+                                <ActionComponent
+                                    state={state}
+                                    setter={setter}
+                                />
+                            </ModalBody>
                         </>
                     )}
                 </ModalContent>
@@ -200,9 +241,11 @@ function ActionButtons({ state }: { state: State }) {
 export function ScoreKeeper({
     bc,
     state,
+    setter,
 }: {
     bc: BroadcastChannel;
     state: State;
+    setter: Dispatch<SetStateAction<State>>;
 }) {
     return (
         <div className="flex flex-col gap-4">
@@ -212,7 +255,7 @@ export function ScoreKeeper({
             <div className="grid grid-cols-2 gap-4">
                 <TeamScore team="homeTeam" state={state} />
                 <TeamScore team="awayTeam" state={state} />
-                <ActionButtons state={state} />
+                <ActionButtons state={state} setter={setter} />
                 <TeamPlayers team="homeTeam" state={state} />
                 <TeamPlayers team="awayTeam" state={state} />
             </div>

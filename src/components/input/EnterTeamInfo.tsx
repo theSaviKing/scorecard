@@ -69,7 +69,7 @@ export function EnterTeamInfo({
                     >
                         <div>
                             <Button
-                                onClick={() => stepper(2)}
+                                onPress={() => stepper(2)}
                                 endContent={<UserPlus className="w-4" />}
                                 variant="flat"
                                 isDisabled={isDisabled}
