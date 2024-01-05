@@ -13,10 +13,17 @@ import {
     ModalContent,
     ModalHeader,
     ModalBody,
+    ModalFooter,
+    RadioGroup,
+    Radio,
+    Autocomplete,
+    AutocompleteItem,
+    Select,
+    SelectItem,
 } from "@nextui-org/react";
 import { BroadcastChannel } from "broadcast-channel";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Edit, Loader, Minus, Plus } from "react-feather";
+import { Edit, Loader, Minus, Plus, X } from "react-feather";
 
 function TeamScore({
     team,
@@ -117,9 +124,81 @@ function AddScore({
     state: State;
     setter: Dispatch<SetStateAction<State>>;
 }) {
+    const [team, setTeam] = useState<"home" | "away" | null>(null);
+    const [thrower, setThrower] = useState("");
+    const [catcher, setCatcher] = useState("");
+    function NoTeamChosen() {
+        return (
+            <div className="rounded p-2 flex justify-center items-center text-sm border-4 border-content2 border-dotted">
+                No team chosen
+            </div>
+        );
+    }
     return (
-        <div className="flex flex-col justify-center items-center gap-2">
-            <p className="text-xl">Choose team:</p>
+        <div className="grid grid-cols-2 gap-y-4 gap-x-8 items-center">
+            <p>Choose team:</p>
+            <div className="grid grid-cols-2 gap-2">
+                <Button
+                    radius="sm"
+                    onPress={() => setTeam("home")}
+                    className={
+                        team == "home"
+                            ? "border bg-primary-200 border-primary-200 text-primary-900 font-bold"
+                            : "border bg-transparent border-primary-500 text-primary-900"
+                    }
+                >
+                    {state.homeTeam.name}
+                </Button>
+                <Button
+                    radius="sm"
+                    onPress={() => setTeam("away")}
+                    className={
+                        team == "away"
+                            ? "border bg-secondary-200 border-secondary-200 text-secondary-900 font-bold"
+                            : "border bg-transparent border-secondary-500 text-secondary-900"
+                    }
+                >
+                    {state.awayTeam.name}
+                </Button>
+            </div>
+            <p>Select throwing player:</p>
+            {team !== null ? (
+                <Select
+                    placeholder="Throwing player"
+                    selectedKeys={[thrower]}
+                    onChange={(e) => setThrower(e.target.value)}
+                    size="sm"
+                >
+                    {state[`${team}Team`].players
+                        .filter((player) => player.name !== catcher)
+                        .map((player) => (
+                            <SelectItem key={player.name}>
+                                {player.name}
+                            </SelectItem>
+                        ))}
+                </Select>
+            ) : (
+                <NoTeamChosen />
+            )}
+            <p>Select catching player:</p>
+            {team !== null ? (
+                <Select
+                    placeholder="Catching player"
+                    selectedKeys={[catcher]}
+                    onChange={(e) => setCatcher(e.target.value)}
+                    size="sm"
+                >
+                    {state[`${team}Team`].players
+                        .filter((player) => player.name !== thrower)
+                        .map((player) => (
+                            <SelectItem key={player.name}>
+                                {player.name}
+                            </SelectItem>
+                        ))}
+                </Select>
+            ) : (
+                <NoTeamChosen />
+            )}
         </div>
     );
 }
@@ -214,7 +293,16 @@ function ActionButtons({
                     </Button>
                 ))}
             </div>
-            <Modal backdrop="blur" isOpen={isOpen} onClose={onClose}>
+            <Modal
+                backdrop="opaque"
+                isOpen={isOpen}
+                onClose={onClose}
+                classNames={{
+                    header: "flex justify-between items-center leading-tight",
+                    closeButton: "hidden",
+                    footer: "grid grid-cols-1",
+                }}
+            >
                 <ModalContent>
                     {(onClose) => (
                         <>
@@ -223,6 +311,13 @@ function ActionButtons({
                                     actions.find((act) => act.key === action)!
                                         .label
                                 }
+                                <Button
+                                    isIconOnly
+                                    radius="full"
+                                    onPress={onClose}
+                                >
+                                    <X className="w-4" />
+                                </Button>
                             </ModalHeader>
                             <ModalBody>
                                 <ActionComponent
@@ -230,6 +325,9 @@ function ActionButtons({
                                     setter={setter}
                                 />
                             </ModalBody>
+                            <ModalFooter>
+                                <Button onPress={onClose}>Close</Button>
+                            </ModalFooter>
                         </>
                     )}
                 </ModalContent>
