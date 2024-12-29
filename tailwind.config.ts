@@ -14,10 +14,6 @@ export default {
             fontFamily: {
                 sans: ["'IBM Plex Sans'", ...defaultTheme.fontFamily.sans],
                 serif: ["'IBM Plex Serif'", ...defaultTheme.fontFamily.serif],
-                display: [
-                    "'Darker Grotesque Variable'",
-                    ...defaultTheme.fontFamily.serif,
-                ],
                 mono: ["'IBM Plex Mono'", ...defaultTheme.fontFamily.mono],
             },
         },
@@ -57,7 +53,6 @@ export default {
                 },
             },
         }),
-        require("tailwindcss-opentype"),
     ],
     darkMode: "class",
 } satisfies Config;

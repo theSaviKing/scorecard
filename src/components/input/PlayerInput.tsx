@@ -101,6 +101,7 @@ export function PlayerInput({
                                     ].players.push({
                                         id: crypto.randomUUID(),
                                         name: "",
+                                        isCaptain: false,
                                         goalsCaught: 0,
                                         goalsThrown: 0,
                                         defensivePlays: 0,

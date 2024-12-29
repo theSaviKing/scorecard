@@ -1,7 +1,3 @@
-import "@fontsource-variable/dm-sans/wght-italic.css";
-import "@fontsource/dm-serif-display/400.css";
-import "@fontsource-variable/darker-grotesque";
-
 // IBM Plex
 import "@fontsource/ibm-plex-sans/100.css";
 import "@fontsource/ibm-plex-sans/200.css";

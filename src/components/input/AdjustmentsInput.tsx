@@ -41,6 +41,7 @@ export function AdjustmentsInput({
                                 ? "bg-primary-100 text-primary-900"
                                 : "bg-secondary-100 text-secondary-900"
                         }`}
+                        key={index}
                     >
                         <p className="text-4xl font-bold font-mono flex justify-center items-center gap-1">
                             +

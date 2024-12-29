@@ -1,7 +1,6 @@
 import { Button } from "@nextui-org/react";
 import { BroadcastChannel } from "broadcast-channel";
-import feather from "feather-icons";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useSessionStorage } from "usehooks-ts";
 import { ScoreKeeper } from "./components";
 import {
@@ -15,24 +14,26 @@ import { State } from "./types";
 const defaultState: State = {
     homeTeam: {
         name: "",
-        players: Array(8).fill({
+        players: Array.from({ length: 8 }, (_, index) => ({
             id: crypto.randomUUID(),
             name: "",
+            isCaptain: index === 0,
             goalsCaught: 0,
             goalsThrown: 0,
             defensivePlays: 0,
-        }),
+        })),
         adjustments: [],
     },
     awayTeam: {
         name: "",
-        players: Array(8).fill({
+        players: Array.from({ length: 8 }, (_, index) => ({
             id: crypto.randomUUID(),
             name: "",
+            isCaptain: index === 0,
             goalsCaught: 0,
             goalsThrown: 0,
             defensivePlays: 0,
-        }),
+        })),
         adjustments: [],
     },
 };
@@ -47,11 +48,10 @@ function App() {
     if (inputDone && step !== null) {
         setStep(null);
     }
-    console.log(inputDone, step);
 
-    useEffect(() => {
-        feather.replace();
-    });
+    if (step === null && !inputDone) {
+        setInputDone(true);
+    }
 
     return (
         <main className="w-full h-full flex flex-col justify-center items-center gap-4">

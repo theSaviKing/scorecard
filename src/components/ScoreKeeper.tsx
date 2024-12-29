@@ -14,17 +14,18 @@ import {
     ModalHeader,
     ModalBody,
     ModalFooter,
-    RadioGroup,
-    Radio,
-    Autocomplete,
-    AutocompleteItem,
     Select,
     SelectItem,
+    ScrollShadow,
+    Divider,
+    Spinner,
 } from "@nextui-org/react";
 import { BroadcastChannel } from "broadcast-channel";
 import { produce } from "immer";
 import { Dispatch, SetStateAction, useState } from "react";
-import { Edit, Loader, Minus, Plus, X } from "react-feather";
+import { Award, Edit, Loader, Minus, Plus, Trash, X } from "react-feather";
+import { useSessionStorage } from "usehooks-ts";
+import { useAsyncList } from "@react-stately/data";
 
 function TeamScore({
     team,
@@ -67,12 +68,19 @@ function TeamScore({
 }
 function TeamPlayers({
     team,
-    state: { [team]: tm },
+    state: {
+        [team]: { players },
+    },
 }: {
     team: "homeTeam" | "awayTeam";
     state: State;
 }) {
+    const [isLoading, setLoading] = useState(true);
     const columns = [
+        {
+            key: "isCaptain",
+            label: "",
+        },
         {
             key: "name",
             label: "Name",
@@ -90,6 +98,28 @@ function TeamPlayers({
             label: "Defensive Plays",
         },
     ];
+    let list = useAsyncList({
+        load: () => {
+            setLoading(false);
+            return { items: players };
+        },
+        sort: async ({ items, sortDescriptor }) => ({
+            items: items.sort((a, b) => {
+                let first = a[sortDescriptor.column];
+                let second = b[sortDescriptor.column];
+                let cmp =
+                    (parseInt(first) || first) < (parseInt(second) || second)
+                        ? -1
+                        : 1;
+
+                if (sortDescriptor.direction === "descending") {
+                    cmp *= -1;
+                }
+
+                return cmp;
+            }),
+        }),
+    });
     return (
         <Table
             classNames={{
@@ -97,18 +127,37 @@ function TeamPlayers({
                 th: "first:rounded-tl-lg first:rounded-b-none last:rounded-tr-lg last:rounded-b-none",
                 thead: "[&>tr]:divide-x-1 [&>tr]:divide-content3",
             }}
+            isStriped
+            selectionMode="single"
+            color={team == "homeTeam" ? "primary" : "secondary"}
+            sortDescriptor={list.sortDescriptor}
+            onSortChange={list.sort}
         >
             <TableHeader columns={columns}>
                 {(column) => (
-                    <TableColumn key={column.key}>{column.label}</TableColumn>
+                    <TableColumn key={column.key} allowsSorting align="center">
+                        {column.label}
+                    </TableColumn>
                 )}
             </TableHeader>
-            <TableBody items={tm.players}>
+            <TableBody
+                items={list.items}
+                isLoading={isLoading}
+                loadingContent={
+                    <Spinner
+                        color={team == "homeTeam" ? "primary" : "secondary"}
+                    />
+                }
+            >
                 {(item) => (
                     <TableRow key={item.id}>
                         {(columnKey) => (
                             <TableCell>
-                                {getKeyValue(item, columnKey)}
+                                {columnKey === "isCaptain" && item.isCaptain ? (
+                                    <Award className="w-3 opacity-80" />
+                                ) : (
+                                    getKeyValue(item, columnKey)
+                                )}
                             </TableCell>
                         )}
                     </TableRow>
@@ -118,12 +167,25 @@ function TeamPlayers({
     );
 }
 
+type Play =
+    | {
+          team: "home" | "away";
+          thrower: string;
+          catcher: string;
+      }
+    | { team: "home" | "away"; defender: string };
 function AddScore({
     state,
     setter,
+    onClose,
+    plays,
+    setPlays,
 }: {
     state: State;
     setter: Dispatch<SetStateAction<State>>;
+    onClose: () => void;
+    plays: Play[];
+    setPlays: Dispatch<SetStateAction<Play[]>>;
 }) {
     const [team, setTeam] = useState<"home" | "away" | null>(null);
     const [thrower, setThrower] = useState("");
@@ -179,9 +241,9 @@ function AddScore({
                     size="sm"
                 >
                     {state[`${team}Team`].players
-                        .filter((player) => player.name !== catcher)
+                        .filter((player) => player.id !== catcher)
                         .map((player) => (
-                            <SelectItem key={player.name}>
+                            <SelectItem key={player.id} value={player.id}>
                                 {player.name}
                             </SelectItem>
                         ))}
@@ -198,9 +260,9 @@ function AddScore({
                     size="sm"
                 >
                     {state[`${team}Team`].players
-                        .filter((player) => player.name !== thrower)
+                        .filter((player) => player.id !== thrower)
                         .map((player) => (
-                            <SelectItem key={player.name}>
+                            <SelectItem key={player.id} value={player.id}>
                                 {player.name}
                             </SelectItem>
                         ))}
@@ -216,8 +278,22 @@ function AddScore({
                             : "[&>span]:text-secondary"
                     }`}
                 >
-                    <span>{thrower}</span> throws to <span>{catcher}</span> for
-                    a point!
+                    <span>
+                        {
+                            state[`${team!}Team`].players.find(
+                                (p) => p.id === thrower
+                            )?.name
+                        }
+                    </span>{" "}
+                    throws to{" "}
+                    <span>
+                        {
+                            state[`${team!}Team`].players.find(
+                                (p) => p.id === catcher
+                            )?.name
+                        }
+                    </span>{" "}
+                    for a point!
                 </p>
             )}
             <Button
@@ -225,12 +301,25 @@ function AddScore({
                 color="success"
                 variant="flat"
                 isDisabled={!(team && thrower && catcher)}
-                onPress={(e) => {
+                onPress={(_) => {
                     setter((st) =>
                         produce(st, (draft) => {
-                            draft[`${team!}Team`];
+                            draft[`${team!}Team`].players.find(
+                                (p) => p.id === thrower
+                            )!.goalsThrown += 1;
+                            draft[`${team!}Team`].players.find(
+                                (p) => p.id === catcher
+                            )!.goalsCaught += 1;
                         })
                     );
+                    setPlays(function (st) {
+                        return st.concat({
+                            team: team!,
+                            thrower: thrower,
+                            catcher: catcher,
+                        });
+                    });
+                    onClose();
                 }}
             >
                 Submit
@@ -241,11 +330,149 @@ function AddScore({
 function DeleteScore({
     state,
     setter,
+    onClose,
+    plays,
+    setPlays,
 }: {
     state: State;
     setter: Dispatch<SetStateAction<State>>;
+    onClose: () => void;
+    plays: Play[];
+    setPlays: Dispatch<SetStateAction<Play[]>>;
 }) {
-    return <div></div>;
+    return (
+        <div className="flex flex-col gap-4">
+            <p className="p-2 border-2 border-content2 rounded text-center inline-flex justify-center items-center gap-1">
+                Hover and click <Trash className="inline w-4" /> to delete a
+                play
+            </p>
+            <Divider />
+            <ScrollShadow className="max-h-60 flex flex-col gap-2">
+                {plays.length > 0 ? (
+                    plays.map((play, index) => (
+                        <div
+                            className={`border rounded grid group transition-all grid-cols-[0fr,6fr] hover:grid-cols-[1fr,6fr] grid-rows-[1fr,1.55fr] ${
+                                play.team == "home"
+                                    ? "border-primary-100 bg-primary-200 text-primary-900"
+                                    : "border-secondary-100 bg-secondary-200 text-secondary-900"
+                            }`}
+                            key={index}
+                        >
+                            <div
+                                className={`row-span-full w-0 group-hover:w-full transition-all overflow-hidden`}
+                            >
+                                <div className="flex justify-center items-center w-full h-full">
+                                    <Button
+                                        isIconOnly
+                                        startContent={<Trash />}
+                                        variant="flat"
+                                        color="danger"
+                                        radius="sm"
+                                        onPress={() => {
+                                            setPlays((plays) =>
+                                                produce(plays, (draft) => {
+                                                    draft.splice(index, 1);
+                                                })
+                                            );
+                                            setter((st) =>
+                                                produce(st, (draft) => {
+                                                    if (play.defender) {
+                                                        draft[
+                                                            `${play.team}Team`
+                                                        ].players.find(
+                                                            (pl) =>
+                                                                pl.id ===
+                                                                play.defender
+                                                        )!.defensivePlays -= 1;
+                                                    } else {
+                                                        draft[
+                                                            `${play.team}Team`
+                                                        ].players.find(
+                                                            (pl) =>
+                                                                pl.id ===
+                                                                play.thrower
+                                                        )!.goalsThrown -= 1;
+                                                        draft[
+                                                            `${play.team}Team`
+                                                        ].players.find(
+                                                            (pl) =>
+                                                                pl.id ===
+                                                                play.catcher
+                                                        )!.goalsCaught -= 1;
+                                                    }
+                                                })
+                                            );
+                                        }}
+                                    ></Button>
+                                </div>
+                            </div>
+                            <p
+                                className={`text-center text-sm font-bold p-2 ${
+                                    play.team == "home"
+                                        ? "bg-primary-100 text-primary-900"
+                                        : "bg-secondary-100 text-secondary-900"
+                                }`}
+                            >
+                                {play.defender
+                                    ? "DEFENSIVE PLAY"
+                                    : "GOAL SCORED"}
+                            </p>
+                            <div className="p-2 text-center flex justify-center items-center row-span-2">
+                                <p>
+                                    {play.defender ? (
+                                        <>
+                                            defense by{" "}
+                                            <span className="font-bold">
+                                                {
+                                                    state[
+                                                        `${play.team}Team`
+                                                    ].players.find(
+                                                        (p) =>
+                                                            p.id ===
+                                                            play.defender
+                                                    )!.name
+                                                }
+                                            </span>{" "}
+                                        </>
+                                    ) : (
+                                        <>
+                                            <span className="font-bold">
+                                                {
+                                                    state[
+                                                        `${play.team}Team`
+                                                    ].players.find(
+                                                        (p) =>
+                                                            p.id ===
+                                                            play.thrower
+                                                    )!.name
+                                                }
+                                            </span>{" "}
+                                            throws to{" "}
+                                            <span className="font-bold">
+                                                {
+                                                    state[
+                                                        `${play.team}Team`
+                                                    ].players.find(
+                                                        (p) =>
+                                                            p.id ===
+                                                            play.catcher
+                                                    )!.name
+                                                }
+                                            </span>
+                                        </>
+                                    )}
+                                </p>
+                            </div>
+                        </div>
+                    ))
+                ) : (
+                    <div className="p-4 bg-content2 rounded flex justify-center items-center">
+                        No scores yet
+                    </div>
+                )}
+            </ScrollShadow>
+        </div>
+    );
 }
 function ModifyPlay({
     state,
@@ -273,6 +500,7 @@ function ActionButtons({
     setter: Dispatch<SetStateAction<State>>;
 }) {
     const { isOpen, onOpen, onClose } = useDisclosure();
+    const [plays, setPlays] = useSessionStorage<Play[]>("plays", []);
 
     const actions = [
         {
@@ -360,6 +588,9 @@ function ActionButtons({
                                 <ActionComponent
                                     state={state}
                                     setter={setter}
+                                    onClose={onClose}
+                                    plays={plays}
+                                    setPlays={setPlays}
                                 />
                             </ModalBody>
                             <ModalFooter>

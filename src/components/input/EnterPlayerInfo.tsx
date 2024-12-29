@@ -112,19 +112,30 @@ export function EnterPlayerInfo({
                                     produce(st, (draft) => {
                                         if (method === "input") {
                                             draft.homeTeam.players =
-                                                draft.homeTeam.players.filter(
-                                                    (p) => p.name.length > 0
-                                                );
+                                                draft.homeTeam.players
+                                                    .filter(
+                                                        (p) => p.name.length > 0
+                                                    )
+                                                    .map((p) => ({
+                                                        ...p,
+                                                        name: p.name.trim(),
+                                                    }));
                                             draft.awayTeam.players =
-                                                draft.awayTeam.players.filter(
-                                                    (p) => p.name.length > 0
-                                                );
+                                                draft.awayTeam.players
+                                                    .filter(
+                                                        (p) => p.name.length > 0
+                                                    )
+                                                    .map((p) => ({
+                                                        ...p,
+                                                        name: p.name.trim(),
+                                                    }));
                                         } else {
                                             draft.homeTeam.players =
                                                 homePlayerList.map(
-                                                    (player) => ({
+                                                    (player, index) => ({
                                                         id: crypto.randomUUID(),
                                                         name: player,
+                                                        isCaptain: index === 0,
                                                         goalsCaught: 0,
                                                         goalsThrown: 0,
                                                         defensivePlays: 0,
@@ -132,9 +143,10 @@ export function EnterPlayerInfo({
                                                 );
                                             draft.awayTeam.players =
                                                 awayPlayerList.map(
-                                                    (player) => ({
+                                                    (player, index) => ({
                                                         id: crypto.randomUUID(),
                                                         name: player,
+                                                        isCaptain: index === 0,
                                                         goalsCaught: 0,
                                                         goalsThrown: 0,
                                                         defensivePlays: 0,

@@ -4,6 +4,7 @@ export interface State {
         players: {
             id: string;
             name: string;
+            isCaptain: boolean;
             goalsCaught: number;
             goalsThrown: number;
             defensivePlays: number;
@@ -15,6 +16,7 @@ export interface State {
         players: {
             id: string;
             name: string;
+            isCaptain: boolean;
             goalsCaught: number;
             goalsThrown: number;
             defensivePlays: number;
